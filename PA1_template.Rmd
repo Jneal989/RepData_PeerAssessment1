@@ -27,10 +27,31 @@ mean_steps <- mean(steps_per_day$steps)
 median_steps <- median(steps_per_day$steps)
 ```
 
-The arithmatic mean for the number of steps taken per day is `r mean_steps` and the median is `r median_steps`
+The arithmatic mean for the number of steps taken per day is `r mean_steps` and the median is `r median_steps`.
 
 ## What is the average daily activity pattern?
+```{r}
+steps_per_interval <- aggregate(steps ~ interval, data=Activity, mean)
+plot(steps_per_interval$interval, steps_per_interval$steps, type ="l", xlab = names(steps_per_interval)[1], ylab = names(steps_per_interval)[2])
+max_int <- steps_per_interval$interval[which.max(steps_per_interval$steps)]
+```
+The 5 min interval with the highest average number of steps is `r max_int`. 
 
 ## Imputing missing values
+We will determine how many missing values exist by using a sum function on Boolean objects where True equals 1 and False equals 0. Then we replace the *NA* values using the interval means.
+```{r}
+missing_values <- sum(is.na(Activity$steps))
+New_Activity <- cbind(Activity,steps_per_interval$steps)
+New_Activity$steps[is.na(New_Activity$steps)] <- New_Activity$`steps_per_interval$steps`[is.na(New_Activity$steps)]
+New_Activity <-New_Activity[,1:3]
+New_steps_per_day <- aggregate(steps ~ date, data=New_Activity, sum)
+hist(New_steps_per_day$steps,xlab="Steps per Day", main = "Histogram of Steps per Day")
+New_mean_steps <- mean(New_steps_per_day$steps)
+New_median_steps <- median(New_steps_per_day$steps)
+mean_diff <- mean_steps - New_mean_steps
+median_diff <- median_steps - New_median_steps
+```
+After replacing the `r missing_values` missing values with the interval means, the mean number of steps taken per day is `r New_mean_steps` with a difference of `r mean_diff` from the previous mean showing no change. However, The median is now `r New_median_steps`, which a difference of `r median_diff` from the previous mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
